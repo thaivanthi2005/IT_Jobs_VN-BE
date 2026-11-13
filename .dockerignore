@@ -1,0 +1,16 @@
+# Không đưa những file/dư liệu không cần thiết vào image
+node_modules
+npm-debug.log
+*.log
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.DS_Store
+Dockerfile
+docker-compose.yml
+.dockerignore
+coverage
+dist
+build

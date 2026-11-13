@@ -1,0 +1,106 @@
+# =====================================================================
+# docker-compose.yml - ITJobs Backend (Express.js)
+#
+# Cách dùng thông thường (DB dùng MongoDB Atlas trong file .env):
+#   docker compose up -d --build
+#   docker compose logs -f api
+#   docker compose down
+#
+# Nếu muốn chạy MongoDB local thay vì Atlas (profile "local-db"):
+#   docker compose --profile local-db up -d --build
+#   (nhớ đổi DATABASE trong .env thành:
+#    mongodb://root:example@mongo:27017/itjobs?authSource=admin)
+# =====================================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: itjobs-be:latest
+    container_name: itjobs-be
+    restart: unless-stopped
+    # Đọc toàn bộ biến môi trường từ file .env (JWT_SECRET, DATABASE,
+    # CORS_ORIGIN, cloud_name, api_key_image, api_secret_image...)
+    env_file:
+      - .env
+    environment:
+      # Ghi đè vài biến cho môi trường trong container
+      PORT: 4000
+      NODE_ENV: ${NODE_ENV:-development}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      # Cổng host : cổng container. Đổi cổng host qua biến API_PORT trong .env
+      # (hoặc sửa trực tiếp) nếu 4000 đang bị chiếm.
+      - "${API_PORT:-4000}:4000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - itjobs-net
+
+  # ---------- MongoDB local (tuỳ chọn, không bật mặc định) ----------
+  mongo:
+    image: mongo:7
+    container_name: itjobs-mongo
+    restart: unless-stopped
+    profiles:
+      - local-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-example}
+      MONGO_INITDB_DATABASE: itjobs
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 20s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    networks:
+      - itjobs-net
+
+  # ---------- Mongo Express để xem DB local (tuỳ chọn) ----------
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: itjobs-mongo-express
+    restart: unless-stopped
+    profiles:
+      - local-db
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-root}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-example}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:-example}@mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    ports:
+      - "${MONGO_EXPRESS_PORT:-8081}:8081"
+    networks:
+      - itjobs-net
+
+networks:
+  itjobs-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
