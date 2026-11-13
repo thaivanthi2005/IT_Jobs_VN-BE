@@ -5,6 +5,7 @@ import JobCompany from "../model/job.model.js";
 import Job from "../model/job.model.js";
 import CV from "../model/cv.model.js";
 import City from "../model/city.model.js";
+import { getCookieOptions } from "../helper/cookie.helper.js";
 
 /**
  * Turns whatever the form posted into a clean list of technology names.
@@ -94,12 +95,7 @@ export const loginPost = async (req, res) => {
     }
   );
 
-  res.cookie("token", token, {
-    maxAge: 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
+  res.cookie("token", token, getCookieOptions(24 * 60 * 60 * 1000));
 
   res.json({
     code: "success",

@@ -1,13 +1,7 @@
 import jwt from "jsonwebtoken";
 import AccountUser from "../model/account-user.model.js";
 import AccountCompany from "../model/account-company.model.js";
-
-// Cấu hình cookie dùng chung khi xóa token
-const cookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-};
+import { getCookieOptions } from "../helper/cookie.helper.js";
 
 export const verifyTokenUser = async (req, res, next) => {
   try {
@@ -42,7 +36,7 @@ export const verifyTokenUser = async (req, res, next) => {
     req.account = existAccountUser;
     next();
   } catch (error) {
-    res.clearCookie("token", cookieOptions);
+    res.clearCookie("token", getCookieOptions());
     res.json({
       code: "error",
       message: "TOKEN Không hợp lệ !",
@@ -73,7 +67,7 @@ export const verifyTokenCompany = async (req, res, next) => {
     });
 
     if (!existAccount) {
-      res.clearCookie("token", cookieOptions);
+      res.clearCookie("token", getCookieOptions());
       res.json({
         code: "error",
         message: "Token không hợp lệ!",
@@ -84,7 +78,7 @@ export const verifyTokenCompany = async (req, res, next) => {
     req.account = existAccount;
     next();
   } catch (error) {
-    res.clearCookie("token", cookieOptions);
+    res.clearCookie("token", getCookieOptions());
     res.json({
       code: "error",
       message: "Token không hợp lệ!",

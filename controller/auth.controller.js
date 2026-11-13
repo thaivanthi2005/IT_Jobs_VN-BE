@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import AccountUser from "../model/account-user.model.js";
 import AccountCompany from "../model/account-company.model.js";
+import { getCookieOptions } from "../helper/cookie.helper.js";
 
 export const check = async (req, res) => {
   try {
@@ -71,7 +72,7 @@ export const check = async (req, res) => {
     }
 
     if (!existAccountUser && !existAccountCompany) {
-      res.clearCookie("token");
+      res.clearCookie("token", getCookieOptions());
       res.json({
         code: "error",
         message: "Tài khoản không tồn tại !",
@@ -87,11 +88,7 @@ export const check = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
+  res.clearCookie("token", getCookieOptions());
   res.json({
     code: "success",
     message: "ĐĂNG XUẤT THÀNH CÔNG",

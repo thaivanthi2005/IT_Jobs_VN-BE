@@ -4,6 +4,7 @@ import AccountUser from "../model/account-user.model.js";
 import AccountCompany from "../model/account-company.model.js";
 import Job from "../model/job.model.js";
 import CV from "../model/cv.model.js";
+import { getCookieOptions } from "../helper/cookie.helper.js";
 
 export const registerPost = async (req, res) => {
   const { fullName, password } = req.body;
@@ -80,12 +81,7 @@ export const loginPost = async (req, res) => {
     }
   );
 
-  res.cookie("token", token, {
-    maxAge: 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
+  res.cookie("token", token, getCookieOptions(24 * 60 * 60 * 1000));
 
   res.json({
     code: "success",

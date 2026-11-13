@@ -29,10 +29,10 @@ services:
       PORT: 4000
       NODE_ENV: ${NODE_ENV:-development}
       TZ: Asia/Ho_Chi_Minh
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-.devjobs.click}
     ports:
-      # Cổng host : cổng container. Đổi cổng host qua biến API_PORT trong .env
-      # (hoặc sửa trực tiếp) nếu 4000 đang bị chiếm.
-      - "${API_PORT:-4000}:4000"
+      # Chỉ lắng nghe trên 127.0.0.1 (localhost của host), ngăn chặn bypass Cloudflare từ Internet
+      - "127.0.0.1:${API_PORT:-4000}:4000"
     healthcheck:
       test:
         [
