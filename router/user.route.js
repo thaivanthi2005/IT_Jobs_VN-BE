@@ -4,12 +4,14 @@ import * as userValidate from "../validates/user.validate.js";
 import * as authMiddleware from "../middleware/auth.middleware.js";
 import * as uploadMiddleware from "../middleware/upload.middleware.js";
 import * as rateLimitMiddleware from "../middleware/rateLimit.middleware.js";
+import * as turnstileMiddleware from "../middleware/turnstile.middleware.js";
 
 const router = Router();
 
 router.post(
   "/register",
   rateLimitMiddleware.authLimiter,
+  turnstileMiddleware.verifyTurnstile,
   userValidate.registerPost,
   userController.registerPost
 );

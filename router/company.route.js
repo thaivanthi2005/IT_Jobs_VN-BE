@@ -5,6 +5,7 @@ import * as companyController from "../controller/company.controller.js";
 import * as authMiddleware from "../middleware/auth.middleware.js";
 import * as uploadMiddleware from "../middleware/upload.middleware.js";
 import * as rateLimitMiddleware from "../middleware/rateLimit.middleware.js";
+import * as turnstileMiddleware from "../middleware/turnstile.middleware.js";
 import { validateObjectId } from "../middleware/validateObjectId.middleware.js";
 
 const router = Router();
@@ -12,6 +13,7 @@ const router = Router();
 router.post(
   "/register",
   rateLimitMiddleware.authLimiter,
+  turnstileMiddleware.verifyTurnstile,
   companyValidate.registerPost,
   companyController.registerPost
 );

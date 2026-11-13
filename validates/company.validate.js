@@ -42,6 +42,7 @@ export const registerPost = (req, res, next) => {
         "password.number": "Mật khẩu phải chứa ít nhất một chữ số!",
         "password.special": "Mật khẩu phải chứa ít nhất một ký tự đặc biệt!",
       }),
+    turnstileToken: Joi.string().optional().allow(""),
   });
 
   const { error } = schema.validate(req.body);
